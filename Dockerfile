@@ -104,7 +104,7 @@ RUN curl -sSL https://www.openssl.org/source/openssl-$SSL_VER.tar.gz | tar xz &&
 # Build libpq
 RUN curl -sSL https://ftp.postgresql.org/pub/source/v$PQ_VER/postgresql-$PQ_VER.tar.gz | tar xz && \
     cd postgresql-$PQ_VER && \
-    CC="musl-gcc -fPIE -pie" LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure \
+    CC="musl-gcc -fPIE -pie" LDFLAGS="-L$PREFIX/lib -static" CPPFLAGS="-I$PREFIX/include" ./configure \
     --without-readline \
     --with-openssl \
     --prefix=$PREFIX --host=x86_64-unknown-linux-musl && \
