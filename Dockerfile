@@ -62,7 +62,7 @@ ENV SSL_VER="1.1.1w" \
     PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     LD_LIBRARY_PATH=$PREFIX
 
-ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib -lssl -lcrypto -lpq -static"
+ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib"
 
 # Install a more recent release of protoc (protobuf-compiler in jammy is 4 years old and misses some features)
 RUN cd /tmp && \
