@@ -62,6 +62,11 @@ ENV SSL_VER="1.1.1w" \
     PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     LD_LIBRARY_PATH=$PREFIX
 
+ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib"
+ENV LDFLAGS="-L/musl/lib -lssl -lcrypto -ldl -lpthread"
+ENV CFLAGS="-I/musl/include"
+ENV CPPFLAGS="-I/musl/include"
+
 # Install a more recent release of protoc (protobuf-compiler in jammy is 4 years old and misses some features)
 RUN cd /tmp && \
     curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_VER}/protoc-${PROTOBUF_VER}-linux-x86_64.zip -o protoc.zip && \
