@@ -62,7 +62,7 @@ ENV SSL_VER="1.1.1w" \
     PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     LD_LIBRARY_PATH=$PREFIX
 
-ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib"
+ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib -C link-args=-lssl -lcrypto -lpq -static"
 
 # Install a more recent release of protoc (protobuf-compiler in jammy is 4 years old and misses some features)
 RUN cd /tmp && \
@@ -106,12 +106,19 @@ RUN curl -sSL https://www.openssl.org/source/openssl-$SSL_VER.tar.gz | tar xz &&
 # Build libpq
 RUN curl -sSL https://ftp.postgresql.org/pub/source/v$PQ_VER/postgresql-$PQ_VER.tar.gz | tar xz && \
     cd postgresql-$PQ_VER && \
-    CC="musl-gcc -fPIE -pie" LDFLAGS="-L$PREFIX/lib -static" CPPFLAGS="-I$PREFIX/include" ./configure \
-    --without-readline \
-    --with-openssl \
-    --prefix=$PREFIX --host=x86_64-unknown-linux-musl && \
-    cd src/interfaces/libpq make -s -j$(nproc) all-static-lib && make -s install install-lib-static && \
-    cd ../../bin/pg_config && make -j $(nproc) && make install && \
+    CC="musl-gcc -fPIE -pie" \
+    LDFLAGS="-L$PREFIX/lib -lssl -lcrypto -static" \
+    CPPFLAGS="-I$PREFIX/include" \
+    ./configure \
+      --without-readline \
+      --with-openssl \
+      --prefix=$PREFIX \
+      --host=x86_64-unknown-linux-musl && \
+    cd src/interfaces/libpq && \
+    make -s -j$(nproc) all-static-lib && \
+    make -s install install-lib-static && \
+    cd ../../bin/pg_config && \
+    make -j $(nproc) && make install && \
     cd .. && rm -rf postgresql-$PQ_VER
 
 # SSL cert directories get overridden by --prefix and --openssldir
