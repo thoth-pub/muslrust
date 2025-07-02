@@ -98,9 +98,9 @@ RUN curl -sSL https://zlib.net/zlib-$ZLIB_VER.tar.gz | tar xz && \
 # TODO: fix so that it works
 RUN curl -sSL https://www.openssl.org/source/openssl-$SSL_VER.tar.gz | tar xz && \
     cd openssl-$SSL_VER && \
-    ./Configure no-tests no-zlib no-shared -fPIC --prefix=$PREFIX --openssldir=$PREFIX/ssl linux-x86_64 && \
+    ./Configure no-tests no-shared -fPIC --prefix=$PREFIX --openssldir=$PREFIX/ssl linux-x86_64 && \
     env C_INCLUDE_PATH=$PREFIX/include make depend 2> /dev/null && \
-    make -j$(nproc) && make all install_sw && \
+    make -j$(nproc) && make install_sw && \
     cd .. && rm -rf openssl-$SSL_VER
 
 # Build libpq
