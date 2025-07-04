@@ -52,30 +52,15 @@ RUN chmod a+X /root
 # Convenience list of versions and variables for compilation later on
 # This helps continuing manually if anything breaks.
 ENV SSL_VER="1.1.1w" \
+    CURL_VER="8.6.0" \
     ZLIB_VER="1.3.1" \
     PQ_VER="11.12" \
-    PROTOBUF_VER="29.2" \
     SCCACHE_VER="0.9.1" \
     CC=musl-gcc \
     PREFIX=/musl \
     PATH=/usr/local/bin:/root/.cargo/bin:$PATH \
     PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     LD_LIBRARY_PATH=$PREFIX
-
-ENV RUSTFLAGS="-C target-feature=+crt-static -L/musl/lib"
-
-# Install a more recent release of protoc (protobuf-compiler in jammy is 4 years old and misses some features)
-RUN cd /tmp && \
-    curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_VER}/protoc-${PROTOBUF_VER}-linux-x86_64.zip -o protoc.zip && \
-    unzip protoc.zip && \
-    cp bin/protoc /usr/bin/protoc && \
-    rm -rf *
-
-# Install prebuilt sccache based on platform
-RUN curl -sSL https://github.com/mozilla/sccache/releases/download/v${SCCACHE_VER}/sccache-v${SCCACHE_VER}-x86_64-unknown-linux-musl.tar.gz | tar xz && \
-    mv sccache-v${SCCACHE_VER}-*-unknown-linux-musl/sccache /usr/local/bin/ && \
-    chmod +x /usr/local/bin/sccache && \
-    rm -rf sccache-v${SCCACHE_VER}-*-unknown-linux-musl
 
 # Set up a prefix for musl build libraries, make the linker's job of finding them easier
 # Primarily for the benefit of postgres.
@@ -100,8 +85,19 @@ RUN curl -sSL https://www.openssl.org/source/openssl-$SSL_VER.tar.gz | tar xz &&
     cd openssl-$SSL_VER && \
     ./Configure no-tests no-shared -fPIC --prefix=$PREFIX --openssldir=$PREFIX/ssl linux-x86_64 && \
     env C_INCLUDE_PATH=$PREFIX/include make depend 2> /dev/null && \
-    make -j$(nproc) && make install_sw && \
+    make -j$(nproc) && make all install_sw && \
     cd .. && rm -rf openssl-$SSL_VER
+
+# Build curl (needs with-zlib and all this stuff to allow https)
+# curl_LDFLAGS needed on stretch to avoid fPIC errors - though not sure from what
+RUN curl -sSL https://curl.se/download/curl-$CURL_VER.tar.gz | tar xz && \
+    cd curl-$CURL_VER && \
+    CC="musl-gcc -fPIC -pie" LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure \
+      --enable-shared=no --with-zlib --enable-static=ssl --enable-optimize --prefix=$PREFIX \
+      --with-ca-path=/etc/ssl/certs/ --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ca-fallback \
+      --with-openssl --without-libpsl && \
+    make -j$(nproc) curl_LDFLAGS="-all-static" && make install && \
+    cd .. && rm -rf curl-$CURL_VER \
 
 # Build libpq
 RUN curl -sSL https://ftp.postgresql.org/pub/source/v$PQ_VER/postgresql-$PQ_VER.tar.gz | tar xz && \
