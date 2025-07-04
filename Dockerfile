@@ -97,7 +97,7 @@ RUN curl -sSL https://curl.se/download/curl-$CURL_VER.tar.gz | tar xz && \
       --with-ca-path=/etc/ssl/certs/ --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ca-fallback \
       --with-openssl --without-libpsl && \
     make -j$(nproc) curl_LDFLAGS="-all-static" && make install && \
-    cd .. && rm -rf curl-$CURL_VER \
+    cd .. && rm -rf curl-$CURL_VER
 
 # Build libpq
 RUN curl -sSL https://ftp.postgresql.org/pub/source/v$PQ_VER/postgresql-$PQ_VER.tar.gz | tar xz && \
