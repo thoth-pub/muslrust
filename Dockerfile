@@ -142,6 +142,7 @@ ENV PATH=/root/.cargo/bin:$PREFIX/bin:$PATH \
     SSL_CERT_DIR=/etc/ssl/certs \
     LIBZ_SYS_STATIC=1 \
     DEBIAN_FRONTEND=noninteractive \
+    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-lssl -lcrypto" \
     TZ=Etc/UTC
 
 # Allow ditching the -w /volume flag to docker run
