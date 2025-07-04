@@ -138,7 +138,6 @@ ENV PATH=/root/.cargo/bin:$PREFIX/bin:$PATH \
     OPENSSL_LIB_DIR=$PREFIX/lib \
     OPENSSL_INCLUDE_DIR=$PREFIX/include \
     OPENSSL_NO_PKG_CONFIG=1 \
-    RUSTFLAGS="-C link-arg=-L$PREFIX/lib -C link-arg=-lssl -C link-arg=-lcrypto -C link-arg=-ldl" \
     SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
     SSL_CERT_DIR=/etc/ssl/certs \
     LIBZ_SYS_STATIC=1 \
