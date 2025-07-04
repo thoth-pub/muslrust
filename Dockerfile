@@ -144,9 +144,6 @@ ENV PATH=/root/.cargo/bin:$PREFIX/bin:$PATH \
     TZ=Etc/UTC
 
 RUN mkdir -p /root/.cargo && \
-    echo '[build]' > /root/.cargo/config.toml && \
-    echo 'target = "x86_64-unknown-linux-musl"' >> /root/.cargo/config.toml && \
-    echo '' >> /root/.cargo/config.toml && \
     echo '[target.x86_64-unknown-linux-musl]' >> /root/.cargo/config.toml && \
     echo 'rustflags = ["-lssl", "-lcrypto"]' >> /root/.cargo/config.toml && \
     echo '' >> /root/.cargo/config.toml && \
