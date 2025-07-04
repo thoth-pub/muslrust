@@ -127,7 +127,6 @@ RUN curl -sSL https://ftp.postgresql.org/pub/source/v$PQ_VER/postgresql-$PQ_VER.
 # See https://github.com/sgrif/pq-sys/pull/18
 ENV PATH=/root/.cargo/bin:$PREFIX/bin:$PATH \
     RUSTUP_HOME=/root/.rustup \
-    CARGO_BUILD_TARGET=x86_64-unknown-linux-musl \
     PKG_CONFIG_ALLOW_CROSS=true \
     PKG_CONFIG_ALL_STATIC=true \
     PQ_LIB_STATIC_X86_64_UNKNOWN_LINUX_MUSL=true \
@@ -142,9 +141,17 @@ ENV PATH=/root/.cargo/bin:$PREFIX/bin:$PATH \
     SSL_CERT_DIR=/etc/ssl/certs \
     LIBZ_SYS_STATIC=1 \
     DEBIAN_FRONTEND=noninteractive \
-    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-lssl -lcrypto" \
-    CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS="" \
     TZ=Etc/UTC
+
+RUN mkdir -p /root/.cargo && \
+    echo '[build]' > /root/.cargo/config.toml && \
+    echo 'target = "x86_64-unknown-linux-musl"' >> /root/.cargo/config.toml && \
+    echo '' >> /root/.cargo/config.toml && \
+    echo '[target.x86_64-unknown-linux-musl]' >> /root/.cargo/config.toml && \
+    echo 'rustflags = ["-lssl", "-lcrypto"]' >> /root/.cargo/config.toml && \
+    echo '' >> /root/.cargo/config.toml && \
+    echo '[target.wasm32-unknown-unknown]' >> /root/.cargo/config.toml && \
+    echo 'rustflags = []' >> /root/.cargo/config.toml
 
 # Allow ditching the -w /volume flag to docker run
 WORKDIR /volume
